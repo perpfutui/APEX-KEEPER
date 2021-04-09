@@ -1,0 +1,9 @@
+dotenv: .env
+
+networks:
+  default: xdai
+  settings:
+    gas_price: 10000000000
+
+wallets:
+  from_key: ${PRIVATE_KEY}
