@@ -46,6 +46,7 @@ class Order:
     leverage: float
     slippage: float
     tipFee: float
+    expiry: float
     reduceOnly: bool
 
     def __str__(self):
@@ -57,7 +58,7 @@ class Order:
         return "Order [%s] %s %.5f %s @ $%.2f" % (self.orderId, 'BUY' if self.orderSize>0 else 'SELL', abs(self.orderSize), self.asset.name, disprice)
 
     def __init__(self, assets, id, trader, asset, limitPrice, stopPrice, orderSize, orderType,
-        collateral, leverage, slippage, tipFee, reduceOnly, stillValid):
+        collateral, leverage, slippage, tipFee, expiry, reduceOnly, stillValid):
         self.orderId = int(id)
         self.trader = trader
         self.asset = next(x for x in assets if x.address.lower() == asset.lower())
@@ -69,6 +70,7 @@ class Order:
         self.leverage = float(leverage)/1e18
         self.slippage = float(slippage)/1e18
         self.tipFee = float(tipFee)/1e18
+        self.expiry = expiry
         self.reduceOnly = reduceOnly
         self.stillValid = stillValid
 
@@ -90,6 +92,7 @@ def get_orders(assets):
         leverage
         slippage
         tipFee
+        expiry
         reduceOnly
         stillValid
       }
@@ -140,6 +143,9 @@ def get_prices(assets):
 def quick_check_can_execute_order(order):
 
     if order.stillValid == False:
+        return False
+
+    if float(order.expiry) < time.time():
         return False
 
     if order.orderType == OrderType.LIMIT.value:
