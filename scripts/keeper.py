@@ -97,8 +97,21 @@ def get_orders(assets):
         stillValid
       }
     }"""
-    resp = requests.post(APEX_SUBGRAPH, json={"query": query})
-    data = resp.json()
+
+    for x in range(0, 4):  # try 4 times
+        try:
+            resp = requests.post(APEX_SUBGRAPH, json={"query": query})
+            data = resp.json()
+            str_error = None
+        except Exception as str_error:
+            data = None
+            pass
+
+        if str_error:
+            sleep(2)  # wait for 2 seconds before trying to fetch the data again
+        else:
+            break
+
     output = []
     if(data is not None):
         # print(data)
