@@ -138,9 +138,23 @@ def get_prices(assets):
             baseAssetReserve
           }
         }""" % amm.address.lower()
-        resp = requests.post(PERP_SUBGRAPH, json={"query": query})
-        if(resp is not None):
-            data = resp.json()
+
+
+        for x in range(0, 4):  # try 4 times
+            try:
+                resp = requests.post(PERP_SUBGRAPH, json={"query": query})
+                data = resp.json()
+                str_error = None
+            except Exception as str_error:
+                data = None
+                pass
+
+            if str_error:
+                sleep(2)  # wait for 2 seconds before trying to fetch the data again
+            else:
+                break
+
+        if(data is not None):
             price = amm.price
             if(data is not None):
                 if(float(data['data']['amm']['baseAssetReserve'])>0):
@@ -203,6 +217,10 @@ def execute_order(order, user):
         LOB.execute(order.orderId, {'from': user})
     except ValueError as err:
         print(err)
+
+
+## missing: update price ping
+
 
 def main():
     user = get_account()
