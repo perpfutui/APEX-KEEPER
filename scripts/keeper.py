@@ -98,6 +98,8 @@ def get_orders(assets):
       }
     }"""
 
+    str_error = None
+
     for x in range(0, 4):  # try 4 times
         try:
             resp = requests.post(APEX_SUBGRAPH, json={"query": query})
@@ -139,7 +141,8 @@ def get_prices(assets):
           }
         }""" % amm.address.lower()
 
-
+        str_error = None
+        
         for x in range(0, 4):  # try 4 times
             try:
                 resp = requests.post(PERP_SUBGRAPH, json={"query": query})
