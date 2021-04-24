@@ -98,32 +98,41 @@ def get_orders(assets):
       }
     }"""
 
-    str_error = None
-
-    for x in range(0, 4):  # try 4 times
+    MAX_TRIES = 3
+    print("getting teh orders SER")
+    tries = 0
+    resp = None
+    while True:
+        resp = requests.post(APEX_SUBGRAPH, json={"query": query})
+        error_happened = 'FALSE'
         try:
-            resp = requests.post(APEX_SUBGRAPH, json={"query": query})
             data = resp.json()
-            str_error = None
-        except Exception as str_error:
-            data = None
-            pass
+            received_data = resp.json()['data']['orders']
+            error_happened = 'FALSE'
+        except:
+            print("Error getting orders fren... trying again ser")
+            error_happened = 'TRUE'
 
-        if str_error:
-            sleep(2)  # wait for 2 seconds before trying to fetch the data again
-        else:
-            break
-
+        if (resp.status_code == 500 or error_happened == 'TRUE') and tries < MAX_TRIES :
+            tries += 1
+            time.sleep()
+            continue
+        break
+    
+    if(error_happened == 'TRUE'):
+        print("Gave up with query. Sad!")
+        return None
     output = []
-    if(data is not None):
-        # print(data)
-        orders = data['data']['orders']
-        for order in orders:
-            output.append(Order(assets,**order))
+    # print(data)
+    orders = data['data']['orders']
+    for order in orders:
+        output.append(Order(assets,**order))
     return output
+
 
 def get_amms():
     output = []
+    print("getting amms ser")
     with urllib.request.urlopen('https://metadata.perp.exchange/production.json') as url:
         data = json.loads(url.read().decode())
         contracts = data['layers']['layer2']['contracts']
@@ -141,23 +150,27 @@ def get_prices(assets):
           }
         }""" % amm.address.lower()
 
-        str_error = None
+        MAX_TRIES = 3
+        tries = 0
+        resp = None
         
-        for x in range(0, 4):  # try 4 times
+        while True:
+            resp = requests.post(PERP_SUBGRAPH, json={"query": query})
+            error_happened = 'FALSE'
             try:
-                resp = requests.post(PERP_SUBGRAPH, json={"query": query})
                 data = resp.json()
-                str_error = None
-            except Exception as str_error:
-                data = None
-                pass
+                received_data = resp.json()['data']['amm']
+                error_happened = 'FALSE'
+            except:
+                print("Error getting orders fren... trying again ser")
+                error_happened = 'TRUE'
 
-            if str_error:
-                sleep(2)  # wait for 2 seconds before trying to fetch the data again
-            else:
-                break
-
-        if(data is not None):
+            if (resp.status_code == 500 or error_happened == 'TRUE') and tries < MAX_TRIES :
+                tries += 1
+                continue
+            break
+        
+        if(error_happened == 'FALSE'):
             price = amm.price
             if(data is not None):
                 if(float(data['data']['amm']['baseAssetReserve'])>0):
