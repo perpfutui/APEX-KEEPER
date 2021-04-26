@@ -100,7 +100,7 @@ def get_orders(assets):
     }"""
 
     MAX_TRIES = 3
-    print("getting teh orders SER")
+    logging.info("getting teh orders SER")
     tries = 0
     resp = None
     while True:
@@ -111,7 +111,7 @@ def get_orders(assets):
             received_data = resp.json()['data']['orders']
             error_happened = 'FALSE'
         except:
-            print("Error getting orders fren... trying again ser")
+            logging.error("Error getting orders fren... trying again ser")
             error_happened = 'TRUE'
 
         if (resp.status_code == 500 or error_happened == 'TRUE') and tries < MAX_TRIES :
@@ -121,7 +121,7 @@ def get_orders(assets):
         break
 
     if(error_happened == 'TRUE'):
-        print("Gave up with query. Sad!")
+        logging.error("Gave up with query. Sad!")
         return None
     output = []
     # print(data)
@@ -133,7 +133,7 @@ def get_orders(assets):
 
 def get_amms():
     output = []
-    print("getting amms ser")
+    logging.info("getting amms ser")
     with urllib.request.urlopen('https://metadata.perp.exchange/production.json') as url:
         data = json.loads(url.read().decode())
         contracts = data['layers']['layer2']['contracts']
@@ -163,7 +163,7 @@ def get_prices(assets):
                 received_data = resp.json()['data']['amm']
                 error_happened = 'FALSE'
             except:
-                print("Error getting orders fren... trying again ser")
+                logging.error("Error getting orders fren... trying again ser")
                 error_happened = 'TRUE'
 
             if (resp.status_code == 500 or error_happened == 'TRUE') and tries < MAX_TRIES :
@@ -182,7 +182,7 @@ def get_prices(assets):
                 if(amm.price != price):
                     logging.info('Price updated for %s from $%.2f to $%.2f' % (amm.name, price, amm.price))
         else:
-            print('NO DATA RECEIVED FOR', query)
+            logging.error('NO DATA RECEIVED FOR', query)
 
 def quick_check_can_execute_order(order):
 
@@ -229,11 +229,11 @@ def quick_check_can_execute_order(order):
     return True
 
 def execute_order(order, user):
-    print('Executing order %s' % order.orderId)
+    logging.info('Executing order %s' % order.orderId)
     try:
         LOB.execute(order.orderId, {'from': user})
     except ValueError as err:
-        print(err)
+        logging.error(err)
 
 
 ## missing: update price ping
@@ -252,7 +252,7 @@ def main():
     logging.getLogger('').addHandler(console)
     user = get_account()
     assets = get_amms()
-    print('Connected with:',user)
+    logging.info('Connected with:',user)
     network.gas_price(1000000000)
     timer = 0
     while True:
