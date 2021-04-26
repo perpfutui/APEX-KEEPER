@@ -252,7 +252,7 @@ def main():
     logging.getLogger('').addHandler(console)
     user = get_account()
     assets = get_amms()
-    logging.info('Connected with:',user)
+    logging.info('Connected with: %s' % user)
     network.gas_price(1000000000)
     timer = 0
     while True:
