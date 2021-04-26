@@ -4,6 +4,7 @@ import requests
 import urllib.request, json
 import time
 from enum import Enum
+import logging
 
 PERP_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/perpetual-protocol/perp-position-subgraph"
 APEX_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/abdullathedruid/apex-keeper"
@@ -109,7 +110,7 @@ def get_orders(assets):
             data = None
             pass
 
-        if str_error:
+        if str_error is not None:
             sleep(2)  # wait for 2 seconds before trying to fetch the data again
         else:
             break
@@ -142,7 +143,7 @@ def get_prices(assets):
         }""" % amm.address.lower()
 
         str_error = None
-        
+
         for x in range(0, 4):  # try 4 times
             try:
                 resp = requests.post(PERP_SUBGRAPH, json={"query": query})
@@ -152,7 +153,7 @@ def get_prices(assets):
                 data = None
                 pass
 
-            if str_error:
+            if str_error is not None:
                 sleep(2)  # wait for 2 seconds before trying to fetch the data again
             else:
                 break
@@ -166,7 +167,7 @@ def get_prices(assets):
                     # print('Could not get data for %s from the graph, attempting smart contract call..' % amm.name)
                     amm.price = amm.contract.getSpotPrice()[0]/1e18
                 if(amm.price != price):
-                    print('Price updated for %s from $%.2f to $%.2f' % (amm.name, price, amm.price))
+                    logging.info('Price updated for %s from $%.2f to $%.2f' % (amm.name, price, amm.price))
         else:
             print('NO DATA RECEIVED FOR', query)
 
@@ -226,6 +227,16 @@ def execute_order(order, user):
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M',
+                    filename='apex.log',
+                    filemode='w')
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
     user = get_account()
     assets = get_amms()
     print('Connected with:',user)
@@ -234,7 +245,7 @@ def main():
     while True:
         orders = get_orders(assets)
         get_prices(assets)
-        print('%s outstanding orders' % len(orders))
+        logging.info('%s outstanding orders' % len(orders))
         for order in orders:
             if quick_check_can_execute_order(order):
                 execute_order(order, user)
