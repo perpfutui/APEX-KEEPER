@@ -185,6 +185,8 @@ def get_prices(assets):
 
 def quick_check_can_execute_order(order):
 
+    print("Checking if we can execute... ")
+
     if order.stillValid == False:
         return False
 
@@ -231,8 +233,7 @@ def execute_order(order, user):
     print('Executing order %s' % order.orderId)
     try:
         LOB.execute(order.orderId, {'from': user})
-    except ValueError as err:
-        print(err)
+    except Exception as e: print(e)
 
 
 ## missing: update price ping
