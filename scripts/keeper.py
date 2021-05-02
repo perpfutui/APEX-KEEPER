@@ -116,7 +116,7 @@ def get_orders(assets):
 
         if (resp.status_code == 500 or error_happened == 'TRUE') and tries < MAX_TRIES :
             tries += 1
-            time.sleep()
+            time.sleep(1)
             continue
         break
 
