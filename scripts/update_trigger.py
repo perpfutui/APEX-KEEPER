@@ -13,7 +13,11 @@ APEX_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/abdullathedruid/apex-ke
 LOB = Contract.from_abi('LimitOrderBook', address='0x02e7B722E178518Ae07a596A7cb5F88B313c453a', abi=json.load(open('interfaces/LimitOrderBook.json','r')))
 
 def update_trigger(order_id, _reserveIndex, user):
-	LOB.pokeContract(order_id,_reserveIndex, {'from': user})
+    try:
+        LOB.pokeContract(order_id,_reserveIndex, {'from': user})
+    except Exception as e:
+        logging.error(e)
+        logging.error(traceback.format_exc())
 
 def get_trailing_orders():
     logging.info("fetching trailing orders ser")

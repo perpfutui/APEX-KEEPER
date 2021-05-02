@@ -178,8 +178,8 @@ def execute_order(order, user):
     try:
         LOB.execute(order.orderId, {'from': user})
     except Exception as e:
-        print(e)
         logging.error(e)
+        logging.error(traceback.format_exc())
 
 
 def get_account_balances():
