@@ -184,14 +184,19 @@ def get_prices(assets):
         else:
             logging.error('NO DATA RECEIVED FOR', query)
 
-def quick_check_can_execute_order(order):
+def quick_check_can_execute_order(order,account_balances):
 
-    print("Checking if we can execute... ")
+    print("Checking if we can execute order id %s ser ..." % order.orderId)
+
+    trader_account_balance = int([account['balance'] for account in account_balances if account['owner'] == '0x3bff6fc198ae8c36642945625a1f20eada5e771b'][0])
 
     if order.stillValid == False:
         return False
 
     if float(order.expiry) < time.time():
+        return False
+
+    if order.collateral > (trader_account_balance/1e18):
         return False
 
     if order.orderType == OrderType.LIMIT.value:
@@ -239,6 +244,18 @@ def execute_order(order, user):
         logging.error(e)
 
 
+def get_account_balances():
+
+    query = """{
+          smartWallets(orderBy:balance, orderDirection: desc, first:10) {
+            owner
+            balance
+          }
+        }"""
+    resp = requests.post(APEX_SUBGRAPH, json={"query": query})
+    data = resp.json()
+    df = data['data']['smartWallets']
+    return(df)
 
 
 ## missing: update price ping
@@ -263,8 +280,11 @@ def main():
     while True:
         orders = get_orders(assets)
         get_prices(assets)
+        account_balances = get_account_balances()
         logging.info('%s outstanding orders' % len(orders))
         for order in orders:
-            if quick_check_can_execute_order(order):
+            if quick_check_can_execute_order(order,account_balances):
+                print(order.trader)
+                print(order.collateral)
                 execute_order(order, user)
         time.sleep(60)
