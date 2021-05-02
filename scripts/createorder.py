@@ -20,3 +20,4 @@ def main():
         0,
         {'from': user.address}
     )
+
