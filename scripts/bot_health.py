@@ -5,6 +5,9 @@ import importlib
 tel = importlib.util.find_spec("telegram")
 use_telegram = tel is not None
 
+if use_telegram is None:
+    print("could not find telegram library")
+
 dotenv_path = join(dirname(dirname(__file__)), '.env')
 load_dotenv(dotenv_path)
 
@@ -13,6 +16,7 @@ CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 if BOT_TOKEN is None or CHAT_ID is None:
     use_telegram = False
+    print("env variables not available")
 
 if use_telegram:
     import telegram
