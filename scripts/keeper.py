@@ -6,8 +6,14 @@ from enum import Enum
 import logging
 from .order_executor import *
 from .update_trigger import *
+from .bot_health import *
 
 LOB = Contract.from_abi('LimitOrderBook', address='0x02e7B722E178518Ae07a596A7cb5F88B313c453a', abi=json.load(open('interfaces/LimitOrderBook.json','r')))
+
+UPDATES_FROM_TELEGRAM = True
+POLLING_TIMER = 60 # How frequently to execute loop (default: 60 seconds)
+TRAILING_ORDER_TIMER = 15*60/POLLING_TIMER #How frequently to execute trailing order poke (default: 15 minutes)
+TELEGRAM_BOT_TIMER = 60*60/POLLING_TIMER #How frequently to get updates from telegram (default: 60 minutes)
 
 def get_account():
     return accounts.load('BOT')
@@ -84,18 +90,24 @@ def main():
     assets = get_amms()
     logging.info('Connected with: %s' % user)
     network.gas_price(1000000000)
-    timer = -1
+    timer = 0
+    if UPDATES_FROM_TELEGRAM == True:
+        telegram_send_initialise()
     while True:
         orders = get_orders(assets)
         get_prices(assets)
         account_balances = get_account_balances()
 
-        if timer % 15 == 0:
+        if timer % TRAILING_ORDER_TIMER == 0:
             trailing_order_update(assets,orders,user)
         logging.info('%s outstanding orders' % len(orders))
         for order in orders:
             if quick_check_can_execute_order(order,account_balances):
                 if full_check_can_execute_order(order,account_balances):
                     execute_order(order, user)
-        time.sleep(60)
+
+        if timer % TELEGRAM_BOT_TIMER == 0 and UPDATES_FROM_TELEGRAM == True:
+            telegram_send_update_health(numOrders = len(orders))
+
+        time.sleep(POLLING_TIMER)
         timer = timer+1
