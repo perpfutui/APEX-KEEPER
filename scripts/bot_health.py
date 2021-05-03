@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 import os
 from os.path import join, dirname
-import telegram
 import importlib
 tel = importlib.util.find_spec("telegram")
 use_telegram = tel is not None
@@ -16,6 +15,7 @@ if BOT_TOKEN is None or CHAT_ID is None:
     use_telegram = False
 
 if use_telegram:
+    import telegram
     bot = telegram.Bot(token=BOT_TOKEN)
 
 def telegram_send_initialise():
