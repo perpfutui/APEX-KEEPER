@@ -10,6 +10,7 @@ PERP_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/perpetual-protocol/perp
 APEX_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/abdullathedruid/apex-keeper"
 
 LOB = Contract.from_abi('LimitOrderBook', address='0x02e7B722E178518Ae07a596A7cb5F88B313c453a', abi=json.load(open('interfaces/LimitOrderBook.json','r')))
+ClearingHouse = Contract.from_abi('ClearingHouse', address='0x5d9593586b4B5edBd23E7Eba8d88FD8F09D83EBd', abi=json.load(open('interfaces/ClearingHouse.json','r')))
 
 class Asset:
     name: str
@@ -179,6 +180,22 @@ def quick_check_can_execute_order(order,account_balances):
 
     return True
 
+def is_negative(num):
+    if num < 0:
+        return True
+    return False
+
+def full_check_can_execute_order(order, account_balances):
+    traderWallet = [account['id'] for account in account_balances if account['owner'] == order.trader]
+    traderPosition = ClearingHouse.getPosition(order.asset.address, traderWallet[0])
+    traderPositionSize = traderPosition[0][0]/1e18
+
+    if order.reduceOnly == True:
+        if is_negative(order.orderSize) == is_negative(traderPositionSize):
+            logging.error("Will not reduce order")
+            return False
+    return True
+
 def execute_order(order, user):
     logging.info('Executing order %s' % order.orderId)
     try:
@@ -191,6 +208,7 @@ def execute_order(order, user):
 def get_account_balances():
     query = """{
           smartWallets(orderBy:balance, orderDirection: desc, first:10) {
+            id
             owner
             balance
           }

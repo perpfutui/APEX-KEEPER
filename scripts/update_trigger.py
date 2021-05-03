@@ -107,20 +107,6 @@ def trailing_order_update(assets,orders,user):
         logging.error(traceback.format_exc())
         time.sleep(1)
 
-def get_account_balances():
-    query = """{
-          smartWallets(orderBy:balance, orderDirection: desc, first:10) {
-            owner
-            balance
-          }
-        }"""
-    resp = requests.post(APEX_SUBGRAPH, json={"query": query})
-    data = resp.json()
-    df = data['data']['smartWallets']
-    return(df)
-
-
-
 #user = get_account()
 #assets = get_amms()
 #orders = get_orders(assets)

@@ -84,16 +84,18 @@ def main():
     assets = get_amms()
     logging.info('Connected with: %s' % user)
     network.gas_price(1000000000)
-    timer = 0
+    timer = -1
     while True:
         orders = get_orders(assets)
         get_prices(assets)
         account_balances = get_account_balances()
+
         if timer % 15 == 0:
             trailing_order_update(assets,orders,user)
         logging.info('%s outstanding orders' % len(orders))
         for order in orders:
             if quick_check_can_execute_order(order,account_balances):
-                execute_order(order, user)
+                if full_check_can_execute_order(order,account_balances):
+                    execute_order(order, user)
         time.sleep(60)
         timer = timer+1
