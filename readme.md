@@ -9,7 +9,7 @@ Anyone can run a Keeper bot. It is a completely permissionless system. All you n
 
 ## Set up. 
 
-1. Install [brownie](https://eth-brownie.readthedocs.io/en/stable/)
+1. Install [brownie](https://eth-brownie.readthedocs.io/en/stable/install.html)
 2. Set up brownie to interact with xdai with the command `brownie networks add Ethereum xdai host=https://dai.poa.network chainid=100 explorer=https://blockscout.com/poa/xdai`
 3. Generate a fresh ethereum address with the command `brownie accounts generate BOT`. This will ask you to create a password to lock the account.
 4. [Acquire xDai](https://docs.apex.win/apex-docs/user-guide/acquiring-xdai) to pay for your bots transaction fees.
