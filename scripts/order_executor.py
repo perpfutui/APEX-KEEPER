@@ -127,20 +127,20 @@ def get_orders(assets):
 
 def quick_check_can_execute_order(order,account_balances):
 
-    logging.info("Checking if we can execute order id %s ser ..." % order.orderId)
+    logging.debug("Checking if we can execute order id %s ser ..." % order.orderId)
 
     trader_account_balance = int([account['balance'] for account in account_balances if account['owner'] == order.trader][0])
 
     if order.stillValid == False:
-        logging.info('Order %s is invalid' % order.orderId)
+        logging.debug('Order %s is invalid' % order.orderId)
         return False
 
     if int(order.expiry) < time.time() and int(order.expiry)!=0:
-        logging.info('Order %s has expired: Expiry: %s Time: %s' % (order.orderId, int(order.expiry), time.time()))
+        logging.debug('Order %s has expired: Expiry: %s Time: %s' % (order.orderId, int(order.expiry), time.time()))
         return False
 
     if order.collateral > (trader_account_balance/1e6):
-        logging.info('User is too poor for order %s' % order.orderId)
+        logging.debug('User is too poor for order %s' % order.orderId)
         return False
 
     if order.orderType == OrderType.LIMIT.value:

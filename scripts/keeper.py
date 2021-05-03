@@ -89,9 +89,11 @@ def main():
         orders = get_orders(assets)
         get_prices(assets)
         account_balances = get_account_balances()
-        # trailing_order_update(assets,orders,user)
+        if timer % 15 == 0:
+            trailing_order_update(assets,orders,user)
         logging.info('%s outstanding orders' % len(orders))
         for order in orders:
             if quick_check_can_execute_order(order,account_balances):
                 execute_order(order, user)
         time.sleep(60)
+        timer = timer+1

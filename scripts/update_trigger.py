@@ -70,8 +70,11 @@ def get_trade_prices(amm, snapshotCreated, max_or_min,price):
         """ % (amm,snapshotCreated,price)
     resp = requests.post(PERP_SUBGRAPH_PRICE, json={"query": query})
     data = resp.json()
-    df = data['data']['reserveSnapshottedEvents'][0]
-    return(df)
+    if(len(data['data']['reserveSnapshottedEvents'])>0):
+        df = data['data']['reserveSnapshottedEvents'][0]
+        return(df)
+    else:
+        return False
 
 def trailing_order_update(assets,orders,user):
     try:
@@ -93,10 +96,11 @@ def trailing_order_update(assets,orders,user):
             amm = trigger_order[2]
             current_size = trigger_order[1]
             new_price = get_trade_prices(trigger_order_list[0][2], order_snapshotCreated, max_or_min,price)
-            # get trade price for amm & after block and get min or max price reserve index
-            if new_price['reserveIndex'] > order_snapshotCreated and price != new_price['price'] and (int(last_updated)+15*60) < time.time():
-                logging.info("calling function to update order #%s price ser" % current_id)
-                update_trigger(trigger_order[0],new_price['reserveIndex'],user)
+            if new_price:
+                # get trade price for amm & after block and get min or max price reserve index
+                if new_price['reserveIndex'] > order_snapshotCreated and price != new_price['price'] and (int(last_updated)+15*60) < time.time():
+                    logging.info("calling function to update order #%s price ser" % current_id)
+                    update_trigger(trigger_order[0],new_price['reserveIndex'],user)
     except Exception as error:
         print("Error updating trigger orders fren... trying again ser")
         logging.error(error)
