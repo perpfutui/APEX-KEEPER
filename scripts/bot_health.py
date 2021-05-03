@@ -5,7 +5,7 @@ import importlib
 tel = importlib.util.find_spec("telegram")
 use_telegram = tel is not None
 
-if use_telegram is None:
+if use_telegram is False:
     print("could not find telegram library")
 
 dotenv_path = join(dirname(dirname(__file__)), '.env')
