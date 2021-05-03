@@ -4,9 +4,12 @@ import json
 import logging
 import requests
 import time
+import traceback
 
 PERP_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/perpetual-protocol/perp-position-subgraph"
 APEX_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/abdullathedruid/apex-keeper"
+
+LOB = Contract.from_abi('LimitOrderBook', address='0x02e7B722E178518Ae07a596A7cb5F88B313c453a', abi=json.load(open('interfaces/LimitOrderBook.json','r')))
 
 class Asset:
     name: str
@@ -129,12 +132,15 @@ def quick_check_can_execute_order(order,account_balances):
     trader_account_balance = int([account['balance'] for account in account_balances if account['owner'] == order.trader][0])
 
     if order.stillValid == False:
+        logging.info('Order %s is invalid' % order.orderId)
         return False
 
-    if float(order.expiry) < time.time():
+    if int(order.expiry) < time.time() and int(order.expiry)!=0:
+        logging.info('Order %s has expired: Expiry: %s Time: %s' % (order.orderId, int(order.expiry), time.time()))
         return False
 
-    if order.collateral > (trader_account_balance/1e18):
+    if order.collateral > (trader_account_balance/1e6):
+        logging.info('User is too poor for order %s' % order.orderId)
         return False
 
     if order.orderType == OrderType.LIMIT.value:
