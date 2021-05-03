@@ -12,6 +12,9 @@ load_dotenv(dotenv_path)
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
+if BOT_TOKEN is None or CHAT_ID is None:
+    use_telegram = False
+
 if use_telegram:
     bot = telegram.Bot(token=BOT_TOKEN)
 
