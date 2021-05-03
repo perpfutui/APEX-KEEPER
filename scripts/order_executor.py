@@ -75,6 +75,7 @@ class Order:
         self.stillValid = stillValid
 
 def get_orders(assets):
+    #This will need updating when there are > 1000 orders
     query = """
     {
       orders(first: 1000, orderBy: tipFee, orderDirection:desc, where:{filled:false, stillValid:true}) {
@@ -206,8 +207,9 @@ def execute_order(order, user):
 
 
 def get_account_balances():
+    # We need to change this when there are more than 1000 wallets
     query = """{
-          smartWallets(orderBy:balance, orderDirection: desc, first:10) {
+          smartWallets(orderBy:balance, orderDirection: desc, first:1000) {
             id
             owner
             balance

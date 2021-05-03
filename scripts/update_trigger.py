@@ -21,7 +21,7 @@ def update_trigger(order_id, _reserveIndex, user):
 
 def get_trailing_orders():
     logging.info("fetching trailing orders ser")
-
+    #Will need updating when > 1000 trailing orders
     query = """
     {
     trailingOrders(first: 1000) {
