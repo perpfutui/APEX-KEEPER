@@ -24,11 +24,19 @@ if use_telegram:
 
 def telegram_send_initialise():
     if use_telegram:
-        print("init telegram")
-        bot.send_message(chat_id=CHAT_ID, text="Apex Bot is NOW ONLINE")
+        try:
+            print("init telegram")
+            bot.send_message(chat_id=CHAT_ID, text="Apex Bot is NOW ONLINE")
+        except Exception as e:
+            logging.error(e)
+            logging.error(traceback.format_exc())
 
 def telegram_send_update_health(**data):
     if use_telegram:
-        print("send telegram update")
-        bot.send_message(chat_id=CHAT_ID, text="-Health Status-")
-        bot.send_message(chat_id=CHAT_ID, text="Current outstanding orders: %s"%data['numOrders'])
+        try:
+            print("send telegram update")
+            bot.send_message(chat_id=CHAT_ID, text="-Health Status-")
+            bot.send_message(chat_id=CHAT_ID, text="Current outstanding orders: %s"%data['numOrders'])
+        except Exception as e:
+            logging.error(e)
+            logging.error(traceback.format_exc())
