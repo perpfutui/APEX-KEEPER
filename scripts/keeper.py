@@ -4,15 +4,21 @@ import urllib.request, json
 import time
 from enum import Enum
 import logging
+
+from .class_asset import *
+from .class_order import *
+from .class_ordertype import *
+
 from .order_executor import *
 from .update_trigger import *
 from .bot_health import *
 
 LOB = Contract.from_abi('LimitOrderBook', address='0x02e7B722E178518Ae07a596A7cb5F88B313c453a', abi=json.load(open('interfaces/LimitOrderBook.json','r')))
+ClearingHouse = Contract.from_abi('ClearingHouse', address='0x5d9593586b4B5edBd23E7Eba8d88FD8F09D83EBd', abi=json.load(open('interfaces/ClearingHouse.json','r')))
 
 UPDATES_FROM_TELEGRAM = True
 POLLING_TIMER = 60 # How frequently to execute loop (default: 60 seconds)
-TRAILING_ORDER_TIMER = 15*60/POLLING_TIMER #How frequently to execute trailing order poke (default: 15 minutes)
+TRAILING_ORDER_TIMER = 1*60/POLLING_TIMER #How frequently to execute trailing order poke (default: 15 minutes)
 TELEGRAM_BOT_TIMER = 60*60/POLLING_TIMER #How frequently to get updates from telegram (default: 60 minutes)
 
 def get_account():
@@ -90,6 +96,7 @@ def main():
     assets = get_amms()
     logging.info('Connected with: %s' % user)
     network.gas_price(1000000000)
+    network.main.gas_buffer(1.25)
     timer = 0
     if UPDATES_FROM_TELEGRAM == True:
         telegram_send_initialise()
@@ -99,12 +106,12 @@ def main():
         account_balances = get_account_balances()
 
         if timer % TRAILING_ORDER_TIMER == 0:
-            trailing_order_update(assets,orders,user)
+            trailing_order_update(LOB, assets,orders,user)
         logging.info('%s outstanding orders' % len(orders))
         for order in orders:
             if quick_check_can_execute_order(order,account_balances):
-                if full_check_can_execute_order(order,account_balances):
-                    execute_order(order, user)
+                if full_check_can_execute_order(ClearingHouse, order,account_balances):
+                    execute_order(LOB, order, user)
 
         if timer % TELEGRAM_BOT_TIMER == 0 and UPDATES_FROM_TELEGRAM == True:
             telegram_send_update_health(numOrders = len(orders))

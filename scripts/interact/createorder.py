@@ -9,6 +9,7 @@ def get_account():
 
 def main():
     user = get_account()
+    network.gas_price("1.0 gwei")
     LOB.addTrailingStopMarketOrderAbs(
         '0x0f346e19F01471C02485DF1758cfd3d624E399B4',
         [Wei("1000 ether")],
@@ -20,4 +21,3 @@ def main():
         0,
         {'from': user.address}
     )
-
