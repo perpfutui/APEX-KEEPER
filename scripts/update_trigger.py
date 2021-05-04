@@ -13,6 +13,7 @@ APEX_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/abdullathedruid/apex-ke
 LOB = Contract.from_abi('LimitOrderBook', address='0x02e7B722E178518Ae07a596A7cb5F88B313c453a', abi=json.load(open('interfaces/LimitOrderBook.json','r')))
 
 def update_trigger(order_id, _reserveIndex, user):
+    logging.info('testing variables. Order id %s Reserve index %s User %s' % (order_id, _reserveIndex, user))
     try:
         LOB.pokeContract(order_id,_reserveIndex, {'from': user})
     except Exception as e:
