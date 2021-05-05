@@ -12,49 +12,10 @@ import traceback
 
 from .class_order import Order
 from .class_ordertype import OrderType
+from .decorators import *
 
 PERP_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/perpetual-protocol/perp-position-subgraph"
 APEX_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/abdullathedruid/apex-keeper"
-
-try:
-    import thread
-except ImportError:
-    import _thread as thread
-
-try:
-    range, _print = xrange, print
-    def print(*args, **kwargs): 
-        flush = kwargs.pop('flush', False)
-        _print(*args, **kwargs)
-        if flush:
-            kwargs.get('file', sys.stdout).flush()            
-except NameError:
-    pass
-
-def quit_function(fn_name):
-    # print to stderr, unbuffered in Python 2.
-    print('{0} took too long'.format(fn_name), file=sys.stderr)
-    sys.stderr.flush() # Python 3 stderr is likely buffered.
-    thread.interrupt_main() # raises KeyboardInterrupt
-
-def exit_after(s):
-    '''
-    use as decorator to exit process if 
-    function takes longer than s seconds
-    '''
-    def outer(fn):
-        def inner(*args, **kwargs):
-            timer = threading.Timer(s, quit_function, args=[fn.__name__])
-            timer.start()
-            try:
-                result = fn(*args, **kwargs)
-            finally:
-                timer.cancel()
-            return result
-        return inner
-    return outer
-
-
 
 def get_orders(assets):
     #This will need updating when there are > 1000 orders
@@ -179,7 +140,7 @@ def full_check_can_execute_order(ClearingHouse, order, account_balances):
             return False
     return True
 
-@exit_after(60)
+@exit_after(30)
 def execute_order(LOB, order, user):
     logging.info('Executing order %s' % order.orderId)
     try:

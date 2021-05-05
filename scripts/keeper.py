@@ -18,7 +18,7 @@ ClearingHouse = Contract.from_abi('ClearingHouse', address='0x5d9593586b4B5edBd2
 
 UPDATES_FROM_TELEGRAM = True
 POLLING_TIMER = 60 # How frequently to execute loop (default: 60 seconds)
-TRAILING_ORDER_TIMER = 1*60/POLLING_TIMER #How frequently to execute trailing order poke (default: 15 minutes)
+TRAILING_ORDER_TIMER = 15*60/POLLING_TIMER #How frequently to execute trailing order poke (default: 15 minutes)
 TELEGRAM_BOT_TIMER = 60*60/POLLING_TIMER #How frequently to get updates from telegram (default: 60 minutes)
 
 def get_account():
