@@ -1,3 +1,13 @@
+from __future__ import print_function
+
+try:
+    import thread
+except ImportError:
+    import _thread as thread
+
+import sys
+import threading
+
 import click
 from brownie import Contract, accounts, chain, interface, network
 import requests
@@ -10,6 +20,43 @@ import traceback
 PERP_SUBGRAPH_PRICE = "https://api.thegraph.com/subgraphs/name/abdullathedruid/perp-limit"
 APEX_SUBGRAPH = "https://api.thegraph.com/subgraphs/name/abdullathedruid/apex-keeper"
 
+
+try:
+    range, _print = xrange, print
+    def print(*args, **kwargs): 
+        flush = kwargs.pop('flush', False)
+        _print(*args, **kwargs)
+        if flush:
+            kwargs.get('file', sys.stdout).flush()            
+except NameError:
+    pass
+
+
+def quit_function(fn_name):
+    # print to stderr, unbuffered in Python 2.
+    print('{0} took too long'.format(fn_name), file=sys.stderr)
+    sys.stderr.flush() # Python 3 stderr is likely buffered.
+    thread.interrupt_main() # raises KeyboardInterrupt
+
+def exit_after(s):
+    '''
+    use as decorator to exit process if 
+    function takes longer than s seconds
+    '''
+    def outer(fn):
+        def inner(*args, **kwargs):
+            timer = threading.Timer(s, quit_function, args=[fn.__name__])
+            timer.start()
+            try:
+                result = fn(*args, **kwargs)
+            finally:
+                timer.cancel()
+            return result
+        return inner
+    return outer
+
+
+@exit_after(60)
 def update_trigger(LOB, order_id, _reserveIndex, user):
     try:
         LOB.pokeContract(order_id,_reserveIndex, {'from': user})
@@ -101,7 +148,11 @@ def trailing_order_update(LOB, assets,orders,user):
                 # get trade price for amm & after block and get min or max price reserve index
                 if new_price['reserveIndex'] > order_snapshotCreated and price != new_price['price'] and (int(last_updated)+15*60) < time.time():
                     logging.info("calling function to update order #%s price ser" % current_id)
-                    update_trigger(LOB, trigger_order[0],new_price['reserveIndex'],user)
+                    try:
+                        update_trigger(LOB, trigger_order[0],new_price['reserveIndex'],user)
+                    except KeyboardInterrupt:
+                        print('trying next one... ')
+
     except Exception as error:
         print("Error updating trigger orders fren... trying again ser")
         logging.error(error)

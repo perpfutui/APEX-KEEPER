@@ -111,7 +111,10 @@ def main():
         for order in orders:
             if quick_check_can_execute_order(order,account_balances):
                 if full_check_can_execute_order(ClearingHouse, order,account_balances):
-                    execute_order(LOB, order, user)
+                    try:
+                        execute_order(LOB, order, user)
+                    except:
+                        next
 
         if timer % TELEGRAM_BOT_TIMER == 0 and UPDATES_FROM_TELEGRAM == True:
             telegram_send_update_health(numOrders = len(orders))
