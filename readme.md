@@ -2,7 +2,7 @@
 
 This is the repo that contains the scripts needed to run a keeper bot. 
 
-The Keeper bot performs an important function in the APEX architecture, as it executes the orders of traders and updates their trailing order prices. In exchange, Keeper bots get paid a fee known as the "bot fee". Read more [here](docs.apex.win)
+The Keeper bot performs an important function in the APEX architecture, as it executes the orders of traders and updates their trailing order prices. In exchange, Keeper bots get paid a fee known as the "bot fee". Read more [here](https://docs.apex.win)
 
 Anyone can run a Keeper bot. It is a completely permissionless system. All you need to do is get some xDai and run this script. 
 
